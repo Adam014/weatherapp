@@ -83,3 +83,6 @@ $RECYCLE.BIN/
 *.swo
 *.sln.docstates
 ~*
+
+# ENV
+appsettings.json
