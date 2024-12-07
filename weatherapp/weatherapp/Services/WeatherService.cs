@@ -1,9 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading.Tasks;
 using WeatherApp.Models;
 using WeatherApp.Helpers;
 
@@ -11,28 +7,21 @@ namespace WeatherApp.Services
 {
     public class WeatherService
     {
-        private readonly string _apiKey;
-        private readonly string _apiHost;
+        private readonly string? _apiKey;
+        private readonly string? _apiHost;
 
         public WeatherService()
         {
             try
             {
-                // ensure env file works
-                if (!File.Exists("appsettings.json"))
-                {
-                    throw new FileNotFoundException("Configuration file 'appsettings.json' not found.");
-                }
+                // Fetch variables from the environment
+                _apiKey = Environment.GetEnvironmentVariable("RAPID_API_KEY");
+                _apiHost = Environment.GetEnvironmentVariable("RAPID_API_HOST");
 
-                // init api config
-                var config = JsonSerializer.Deserialize<dynamic>(File.ReadAllText("appsettings.json"));
-                _apiKey = config["RapidApiKey"];
-                _apiHost = config["RapidApiHost"];
-
-                // validate api envs
+                // Validate the variables
                 if (string.IsNullOrEmpty(_apiKey) || string.IsNullOrEmpty(_apiHost))
                 {
-                    throw new InvalidOperationException("API key or host is not configured properly in 'appsettings.json'.");
+                    throw new InvalidOperationException("API Key or Host is missing in environment variables.");
                 }
             }
             catch (Exception ex)
