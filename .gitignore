@@ -5,3 +5,5 @@
 /.vs
 /weatherapp/.vs/weatherapp
 /weatherapp/.vs/ProjectEvaluation
+/weatherapp/weatherapp/appsettings.json
+/weatherapp/weatherapp/.env
