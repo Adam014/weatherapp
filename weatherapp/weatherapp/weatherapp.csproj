@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="dotenv.net" Version="3.2.1" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
   </ItemGroup>
 
