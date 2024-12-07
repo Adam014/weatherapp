@@ -11,11 +11,11 @@ namespace WeatherApp.Services
 
         public DatabaseService()
         {
-            // Ensure the database file is in the same directory as the executable
+            // ensure the database file is in the same directory as the executable
             _dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "weather.db");
             _connectionString = $"Data Source={_dbPath};Version=3;";
 
-            // Initialize the database and table
+            // init db
             InitializeDatabase();
         }
 

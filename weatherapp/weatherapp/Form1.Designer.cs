@@ -26,7 +26,6 @@
             this.cityInput = new System.Windows.Forms.TextBox();
             this.fetchWeatherButton = new System.Windows.Forms.Button();
             this.unitToggle = new System.Windows.Forms.ComboBox();
-            this.errorLabel = new System.Windows.Forms.Label();
             this.weatherGrid = new System.Windows.Forms.TableLayoutPanel();
             this.SuspendLayout();
 
@@ -35,6 +34,7 @@
             this.cityInput.Name = "cityInput";
             this.cityInput.PlaceholderText = "Enter city";
             this.cityInput.Size = new System.Drawing.Size(200, 27);
+            this.cityInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CityInput_KeyDown);
 
             // Fetch Weather Button
             this.fetchWeatherButton.Location = new System.Drawing.Point(270, 20);
@@ -59,36 +59,27 @@
             // Weather Grid (TableLayoutPanel)
             this.weatherGrid.Location = new System.Drawing.Point(50, 70);
             this.weatherGrid.Name = "weatherGrid";
-            this.weatherGrid.Size = new System.Drawing.Size(700, 400);
-            this.weatherGrid.ColumnCount = 2;
-            this.weatherGrid.RowCount = 1;
             this.weatherGrid.AutoScroll = true;
             this.weatherGrid.Dock = DockStyle.Fill;
-            this.weatherGrid.Padding = new Padding(60);
+            this.weatherGrid.Padding = new Padding(10, 70, 10, 20); // Add padding at the bottom
+            this.weatherGrid.Margin = new Padding(0, 0, 0, 70); // Ensure extra margin at the bottom
+            this.weatherGrid.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            this.weatherGrid.ColumnCount = 2;
+            this.weatherGrid.RowCount = 0;
+            this.weatherGrid.ColumnStyles.Clear();
             this.weatherGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             this.weatherGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            this.weatherGrid.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-            // Error Label
-            this.errorLabel.Location = new System.Drawing.Point(50, 550); // Adjust position to ensure it's visible
-            this.errorLabel.Name = "errorLabel";
-            this.errorLabel.Size = new System.Drawing.Size(700, 30); // Large enough to display messages
-            this.errorLabel.ForeColor = System.Drawing.Color.Red; // Use red color for error messages
-            this.errorLabel.Font = new Font("Segoe UI", 10F); // Ensure it's readable
-            this.errorLabel.TextAlign = ContentAlignment.MiddleLeft;
-            this.errorLabel.Text = ""; // Ensure it's empty by default
-            this.errorLabel.Visible = true; // Always visible
+            this.weatherGrid.RowStyles.Clear();
 
             // Form1
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 550);
+            this.ClientSize = new System.Drawing.Size(600, 900);
             this.BackColor = Color.FromArgb(26, 26, 29);
             this.Controls.Add(this.cityInput);
             this.Controls.Add(this.fetchWeatherButton);
             this.Controls.Add(this.unitToggle);
             this.Controls.Add(this.weatherGrid);
-            this.Controls.Add(this.errorLabel);
             this.Name = "Form1";
             this.Text = "Weather App";
             this.ResumeLayout(false);
@@ -98,7 +89,6 @@
         private System.Windows.Forms.TextBox cityInput;
         private System.Windows.Forms.Button fetchWeatherButton;
         private System.Windows.Forms.ComboBox unitToggle;
-        private System.Windows.Forms.Label errorLabel;
         private System.Windows.Forms.TableLayoutPanel weatherGrid;
 
         #endregion

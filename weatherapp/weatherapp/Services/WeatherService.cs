@@ -4,10 +4,12 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WeatherApp.Helpers;
 using WeatherApp.Models;
 
 namespace WeatherApp.Services
 {
+    // defined error resposne from the api endpoint
     public class ErrorResponse
     {
         public string? Cod { get; set; }
@@ -27,22 +29,23 @@ namespace WeatherApp.Services
             _databaseService = databaseService;
         }
 
+        // function for getting the weather, first we check db, if not found fetching time
         public async Task<WeatherData?> GetWeatherAsync(string city, string lang)
         {
             try
             {
-                // Check cached data
+                // check cached data
                 var cachedData = _databaseService.GetWeatherData(city);
                 if (!string.IsNullOrEmpty(cachedData))
                 {
                     return JsonSerializer.Deserialize<WeatherData>(cachedData);
                 }
 
-                // Fetch from API
+                // fetch from API
                 var response = await FetchWeatherFromApi(city, lang);
                 if (response == null) return null;
 
-                // Save to database
+                // save to database
                 var jsonData = JsonSerializer.Serialize(response);
                 _databaseService.SaveWeatherData(city, jsonData);
 
@@ -50,11 +53,12 @@ namespace WeatherApp.Services
             }
             catch (Exception ex)
             {
-                ShowMessageBox("Error", ex.Message, MessageBoxIcon.Error);
+                MessageHelper.ShowMessage("Error", ex.Message, MessageBoxIcon.Error);
                 return null;
             }
         }
 
+        // function to fetch from the api
         private async Task<WeatherData?> FetchWeatherFromApi(string city, string lang)
         {
             using var client = new HttpClient();
@@ -64,11 +68,12 @@ namespace WeatherApp.Services
             var url = $"https://open-weather13.p.rapidapi.com/city/{city}/{lang}";
             var httpResponse = await client.GetAsync(url);
 
-            // We need to add check if the response is 200
+            // TODO: We need to add check if the response is 200
 
             return await httpResponse.Content.ReadFromJsonAsync<WeatherData>();
         }
 
+        // function to convert temperatues (celsius, fahrenheit and kelvins)
         public double ConvertTemperature(double temp, string unit) =>
             unit switch
             {
@@ -77,10 +82,5 @@ namespace WeatherApp.Services
                 "Kelvin" => (temp - 32) * 5 / 9 + 273.15,
                 _ => temp
             };
-
-        private void ShowMessageBox(string title, string message, MessageBoxIcon icon)
-        {
-            MessageBox.Show(message, title, MessageBoxButtons.OK, icon);
-        }
     }
 }
