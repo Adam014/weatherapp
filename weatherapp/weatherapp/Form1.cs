@@ -1,6 +1,4 @@
-using System;
-using System.Windows.Forms;
-using WeatherApp.Models;
+﻿using WeatherApp.Models;
 using WeatherApp.Services;
 using WeatherApp.Helpers;
 using weatherapp.Services.Helpers;
@@ -12,14 +10,18 @@ namespace weatherapp
         private readonly WeatherService _weatherService;
         private WeatherData? _currentWeatherData;
         private string _currentUnit = "Celsius"; // Default temp unit
+        private bool isPanelVisible = true; 
 
         public Form1()
         {
             InitializeComponent();
+            //var databaseService = new DatabaseService();
+            //databaseService.ResetDatabase(); // TEMPORARY RESET
             _weatherService = new WeatherService(new DatabaseService());
+            LoadCityList();
         }
 
-        // Fetch weather data when the button is clicked
+        // fetching weather on the button click
         private async void FetchWeatherButton_Click(object sender, EventArgs e)
         {
             string city = cityInput.Text.Trim();
@@ -31,13 +33,11 @@ namespace weatherapp
             }
 
             ResetWeatherGrid();
-
             SetLoadingState(true);
 
             _currentWeatherData = await _weatherService.GetWeatherAsync(city, "CZ");
             if (_currentWeatherData != null)
             {
-                // Check if Weather data exists
                 if (_currentWeatherData.Weather != null && _currentWeatherData.Weather.Count > 0)
                 {
                     WeatherDataDisplayHelper.DisplayWeatherData(
@@ -46,8 +46,10 @@ namespace weatherapp
                         _currentUnit,
                         _weatherService
                     );
-
                     await AppIconHelper.SetAppIconAsync(this, _currentWeatherData.Weather[0].Icon);
+
+                    // Add city to the list
+                    AddCityToList(city, _currentWeatherData.Sys?.Country ?? "N/A");
                 }
                 else
                 {
@@ -72,7 +74,7 @@ namespace weatherapp
             weatherGrid.ResumeLayout(); 
         }
 
-        // Handle temperature unit change
+        // handeling change && converting temp with the selected temp unit 
         private void UnitToggle_SelectedIndexChanged(object sender, EventArgs e)
         {
             _currentUnit = unitToggle.SelectedItem.ToString();
@@ -87,7 +89,7 @@ namespace weatherapp
             }
         }
 
-        // Submit weather request on Enter key press
+        // submit request for the weather on enter keypress
         private void CityInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -97,7 +99,7 @@ namespace weatherapp
             }
         }
 
-        // Show or hide a loading indicator
+        // show or hide loader
         private void SetLoadingState(bool isLoading)
         {
             if (isLoading)
@@ -113,6 +115,73 @@ namespace weatherapp
                 };
                 weatherGrid.Controls.Add(loadingLabel);
             }
+        }
+
+        // load cities from the db into the listbox
+        private void LoadCityList()
+        {
+            var cities = _weatherService.GetSavedCities();
+            citiesListBox.Items.Clear();
+            foreach (var city in cities)
+            {
+                if (!string.IsNullOrWhiteSpace(city)) 
+                {
+                    citiesListBox.Items.Add(city);
+                }
+            }
+        }
+
+        // add a city to the listbox
+        private void AddCityToList(string city, string country)
+        {
+            string cityEntry = $"{city}, {country}";
+            if (!citiesListBox.Items.Contains(cityEntry) && !string.IsNullOrWhiteSpace(city))
+            {
+                citiesListBox.Items.Add(cityEntry);
+            }
+        }
+
+        // handle city selection from the ListBox
+        private async void CitiesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (citiesListBox.SelectedItem is string selectedCity)
+            {
+                string city = selectedCity.Split(',')[0].Trim();
+                ResetWeatherGrid();
+                SetLoadingState(true);
+
+                _currentWeatherData = await _weatherService.GetWeatherAsync(city, "CZ");
+                if (_currentWeatherData != null)
+                {
+                    WeatherDataDisplayHelper.DisplayWeatherData(
+                        weatherGrid,
+                        _currentWeatherData,
+                        _currentUnit,
+                        _weatherService
+                    );
+                }
+
+                SetLoadingState(false);
+            }
+        }
+
+        // toggle function to hide or show the panel with the saved cities
+        private void TogglePanelButton_Click(object sender, EventArgs e)
+        {
+            if (isPanelVisible)
+            {
+                // Hide the panel
+                citiesPanel.Visible = false;
+                togglePanelButton.Text = "<";
+            }
+            else
+            {
+                // Show the panel
+                citiesPanel.Visible = true;
+                togglePanelButton.Text = ">"; 
+            }
+
+            isPanelVisible = !isPanelVisible;
         }
     }
 }

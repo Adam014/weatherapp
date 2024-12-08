@@ -1,6 +1,6 @@
-﻿using System;
-using System.Data.SQLite;
-using System.IO;
+﻿using System.Data.SQLite;
+using System.Text.Json;
+using WeatherApp.Models;
 
 namespace WeatherApp.Services
 {
@@ -109,6 +109,59 @@ namespace WeatherApp.Services
 
             // if no record is found or timestamp is invalid, consider the data outdated
             return true;
+        }
+
+        // get all cities that are saved in the db (format= city.name, city.country (Prague,CZ))
+        public List<string> GetSavedCities()
+        {
+            var cities = new List<string>();
+
+            using var connection = new SQLiteConnection(_connectionString);
+            connection.Open();
+
+            string query = "SELECT Data FROM Weather";
+            using var command = new SQLiteCommand(query, connection);
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var data = reader["Data"].ToString();
+                if (!string.IsNullOrWhiteSpace(data))
+                {
+                    var weatherData = JsonSerializer.Deserialize<WeatherData>(data);
+                    if (weatherData != null && !string.IsNullOrWhiteSpace(weatherData.Name) && !string.IsNullOrWhiteSpace(weatherData.Sys?.Country))
+                    {
+                        cities.Add($"{weatherData.Name}, {weatherData.Sys.Country}");
+                    }
+                }
+            }
+
+            return cities;
+        }
+
+        // Debugging function to reset database when it is needed
+        public void ResetDatabase()
+        {
+            using var connection = new SQLiteConnection(_connectionString);
+            connection.Open();
+
+            // Drop the Weather table if it exists
+            string dropTableQuery = "DROP TABLE IF EXISTS Weather";
+            using var dropCommand = new SQLiteCommand(dropTableQuery, connection);
+            dropCommand.ExecuteNonQuery();
+
+            // Recreate the Weather table
+            string createTableQuery = @"
+        CREATE TABLE IF NOT EXISTS Weather (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            City TEXT NOT NULL,
+            Data TEXT NOT NULL,
+            LastUpdated DATETIME NOT NULL
+        )";
+            using var createCommand = new SQLiteCommand(createTableQuery, connection);
+            createCommand.ExecuteNonQuery();
+
+            Console.WriteLine("Database has been reset.");
         }
     }
 }

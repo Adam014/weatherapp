@@ -69,5 +69,11 @@ namespace WeatherApp.Services
                 "Kelvin" => (temp - 32) * 5 / 9 + 273.15,
                 _ => temp
             };
+
+        // get all the saved cities from the db
+        public List<string> GetSavedCities()
+        {
+            return _databaseService.GetSavedCities();
+        }
     }
 }

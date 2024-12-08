@@ -6,6 +6,9 @@
         ///  Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.Panel citiesPanel;
+        private System.Windows.Forms.ListBox citiesListBox;
+        private System.Windows.Forms.Button togglePanelButton;
 
         /// <summary>
         ///  Clean up any resources being used.
@@ -27,7 +30,37 @@
             this.fetchWeatherButton = new System.Windows.Forms.Button();
             this.unitToggle = new System.Windows.Forms.ComboBox();
             this.weatherGrid = new System.Windows.Forms.TableLayoutPanel();
+            this.citiesPanel = new System.Windows.Forms.Panel();
+            this.citiesListBox = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
+
+            // Cities Panel
+            this.citiesPanel.Dock = DockStyle.Right;
+            this.citiesPanel.Width = 150;
+            this.citiesPanel.BackColor = Color.FromArgb(30, 30, 33);
+            this.citiesPanel.Padding = new Padding(10);
+            this.citiesPanel.Controls.Add(this.citiesListBox);
+
+            // Cities ListBox
+            this.citiesListBox.Dock = DockStyle.Fill;
+            this.citiesListBox.BackColor = Color.FromArgb(42, 42, 45);
+            this.citiesListBox.ForeColor = Color.White;
+            this.citiesListBox.Font = new Font("Segoe UI", 10);
+            this.citiesListBox.BorderStyle = BorderStyle.None;
+            this.citiesListBox.SelectedIndexChanged += new System.EventHandler(this.CitiesListBox_SelectedIndexChanged);
+
+            // Toggle Panel Button
+            this.togglePanelButton = new Button
+            {
+                Text = ">", 
+                Dock = DockStyle.Right,
+                Width = 30,
+                BackColor = Color.FromArgb(26, 26, 29),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            this.togglePanelButton.FlatAppearance.BorderSize = 0;
+            this.togglePanelButton.Click += new EventHandler(this.TogglePanelButton_Click);
 
             // control panel (input & buttons)
             var controlsPanel = new Panel
@@ -89,6 +122,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(570, 930);
             this.BackColor = Color.FromArgb(26, 26, 29);
+            this.Controls.Add(this.togglePanelButton);
+            this.Controls.Add(this.citiesPanel);
             this.Controls.Add(weatherGrid); 
             this.Controls.Add(controlsPanel);
             this.Name = "Form1";
