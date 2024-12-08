@@ -29,6 +29,9 @@ namespace weatherapp
                 return;
             }
 
+            // Reset grid before loading new data
+            ResetWeatherGrid();
+
             SetLoadingState(true);
 
             _currentWeatherData = await _weatherService.GetWeatherAsync(city, "CZ");
@@ -44,6 +47,16 @@ namespace weatherapp
             }
 
             SetLoadingState(false);
+        }
+
+        // function to reset the grid
+        private void ResetWeatherGrid()
+        {
+            weatherGrid.SuspendLayout(); 
+            weatherGrid.Controls.Clear();
+            weatherGrid.RowStyles.Clear();
+            weatherGrid.RowCount = 0;
+            weatherGrid.ResumeLayout(); 
         }
 
         // Handle temperature unit change

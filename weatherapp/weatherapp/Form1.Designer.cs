@@ -29,6 +29,23 @@
             this.weatherGrid = new System.Windows.Forms.TableLayoutPanel();
             this.SuspendLayout();
 
+            // control panel (input & buttons)
+            var controlsPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 60,
+                Padding = new Padding(10),
+                BackColor = Color.FromArgb(26, 26, 29)
+            };
+            controlsPanel.Controls.Add(cityInput);
+            controlsPanel.Controls.Add(fetchWeatherButton);
+            controlsPanel.Controls.Add(unitToggle);
+
+            // input & buttons location inside of the control panel
+            cityInput.Location = new System.Drawing.Point(10, 10);
+            fetchWeatherButton.Location = new System.Drawing.Point(220, 10);
+            unitToggle.Location = new System.Drawing.Point(350, 10);
+
             // City Input
             this.cityInput.Location = new System.Drawing.Point(50, 20);
             this.cityInput.Name = "cityInput";
@@ -39,7 +56,7 @@
             // Fetch Weather Button
             this.fetchWeatherButton.Location = new System.Drawing.Point(270, 20);
             this.fetchWeatherButton.Name = "fetchWeatherButton";
-            this.fetchWeatherButton.Size = new System.Drawing.Size(100, 30);
+            this.fetchWeatherButton.Size = new System.Drawing.Size(100, 22);
             this.fetchWeatherButton.BackColor = Color.FromArgb(166, 77, 121);
             this.fetchWeatherButton.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             this.fetchWeatherButton.Text = "Get Weather";
@@ -57,29 +74,23 @@
             this.unitToggle.SelectedIndexChanged += new System.EventHandler(this.UnitToggle_SelectedIndexChanged);
 
             // Weather Grid (TableLayoutPanel)
-            this.weatherGrid.Location = new System.Drawing.Point(50, 70);
-            this.weatherGrid.Name = "weatherGrid";
-            this.weatherGrid.AutoScroll = true;
-            this.weatherGrid.Dock = DockStyle.Fill;
-            this.weatherGrid.Padding = new Padding(10, 70, 10, 20); // Add padding at the bottom
-            this.weatherGrid.Margin = new Padding(0, 0, 0, 70); // Ensure extra margin at the bottom
-            this.weatherGrid.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
-            this.weatherGrid.ColumnCount = 2;
-            this.weatherGrid.RowCount = 0;
-            this.weatherGrid.ColumnStyles.Clear();
-            this.weatherGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            this.weatherGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            this.weatherGrid.RowStyles.Clear();
+            weatherGrid.Dock = DockStyle.Fill; 
+            weatherGrid.AutoScroll = true;
+            weatherGrid.Padding = new Padding(10); 
+            weatherGrid.Margin = new Padding(0);
+            weatherGrid.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            weatherGrid.ColumnCount = 2;
+            weatherGrid.ColumnStyles.Clear();
+            weatherGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            weatherGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
 
             // Form1
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(520, 930);
+            this.ClientSize = new System.Drawing.Size(570, 930);
             this.BackColor = Color.FromArgb(26, 26, 29);
-            this.Controls.Add(this.cityInput);
-            this.Controls.Add(this.fetchWeatherButton);
-            this.Controls.Add(this.unitToggle);
-            this.Controls.Add(this.weatherGrid);
+            this.Controls.Add(weatherGrid); 
+            this.Controls.Add(controlsPanel);
             this.Name = "Form1";
             this.Text = "Weather App";
             this.ResumeLayout(false);
