@@ -16,18 +16,11 @@ namespace WeatherApp.Services
         public string? Message { get; set; }
     }
 
-    public class WeatherService
+    public class WeatherService(DatabaseService databaseService)
     {
-        private readonly string _apiKey;
-        private readonly string _apiHost;
-        private readonly DatabaseService _databaseService;
-
-        public WeatherService(DatabaseService databaseService)
-        {
-            _apiKey = Environment.GetEnvironmentVariable("RAPID_API_KEY") ?? throw new InvalidOperationException("API Key is missing.");
-            _apiHost = Environment.GetEnvironmentVariable("RAPID_API_HOST") ?? throw new InvalidOperationException("API Host is missing.");
-            _databaseService = databaseService;
-        }
+        private readonly string _apiKey = Environment.GetEnvironmentVariable("RAPID_API_KEY") ?? throw new InvalidOperationException("API Key is missing.");
+        private readonly string _apiHost = Environment.GetEnvironmentVariable("RAPID_API_HOST") ?? throw new InvalidOperationException("API Host is missing.");
+        private readonly DatabaseService _databaseService = databaseService;
 
         // function for getting the weather, we check if the data needs to be updated, and when it does, we freshly fetch it from the api and save it to the db
         public async Task<WeatherData?> GetWeatherAsync(string city, string lang)
@@ -73,8 +66,6 @@ namespace WeatherApp.Services
 
             var url = $"https://open-weather13.p.rapidapi.com/city/{city}/{lang}";
             var httpResponse = await client.GetAsync(url);
-
-            // TODO: We need to add check if the response is 200
 
             return await httpResponse.Content.ReadFromJsonAsync<WeatherData>();
         }

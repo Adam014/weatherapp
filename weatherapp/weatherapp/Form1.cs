@@ -29,7 +29,6 @@ namespace weatherapp
                 return;
             }
 
-            // Reset grid before loading new data
             ResetWeatherGrid();
 
             SetLoadingState(true);
@@ -37,13 +36,26 @@ namespace weatherapp
             _currentWeatherData = await _weatherService.GetWeatherAsync(city, "CZ");
             if (_currentWeatherData != null)
             {
-                WeatherDataDisplayHelper.DisplayWeatherData(
-                    weatherGrid,
-                    _currentWeatherData,
-                    _currentUnit,
-                    _weatherService
-                );
-                await AppIconHelper.SetAppIconAsync(this, _currentWeatherData.Weather[0].Icon);
+                // Check if Weather data exists
+                if (_currentWeatherData.Weather != null && _currentWeatherData.Weather.Count > 0)
+                {
+                    WeatherDataDisplayHelper.DisplayWeatherData(
+                        weatherGrid,
+                        _currentWeatherData,
+                        _currentUnit,
+                        _weatherService
+                    );
+
+                    await AppIconHelper.SetAppIconAsync(this, _currentWeatherData.Weather[0].Icon);
+                }
+                else
+                {
+                    MessageHelper.ShowMessage("Weather data is unavailable for the selected city.", "Error", MessageBoxIcon.Warning);
+                }
+            }
+            else
+            {
+                MessageHelper.ShowMessage("Failed to fetch weather data. Please try again.", "Error", MessageBoxIcon.Warning);
             }
 
             SetLoadingState(false);

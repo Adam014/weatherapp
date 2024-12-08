@@ -10,27 +10,94 @@ namespace WeatherApp.Helpers
         // displaying the cards into the grid
         public static void DisplayWeatherData(TableLayoutPanel weatherGrid, WeatherData weather, string unit, WeatherService service)
         {
-            weatherGrid.SuspendLayout();
+            if (weather == null)
+            {
+                MessageHelper.ShowMessage("No weather data found. Please try again.", "Error", MessageBoxIcon.Warning);
+                return;
+            }
 
-            weatherGrid.Controls.Clear();
-            var alternatingColors = new[] { Color.FromArgb(42, 42, 45), Color.FromArgb(26, 26, 29) };
+            try
+            {
+                weatherGrid.SuspendLayout();
+                weatherGrid.Controls.Clear();
 
-            AddOrUpdateWeatherCard(weatherGrid, "City", $"{weather.Name}, {weather.Sys.Country}", alternatingColors[0]);
-            AddOrUpdateWeatherCard(weatherGrid, "Weather", $"{weather.Weather[0].Description} ({weather.Weather[0].Main})", alternatingColors[1]);
-            AddOrUpdateWeatherCard(weatherGrid, "Temperature", $"{service.ConvertTemperature(weather.Main.Temp, unit):F1}° {unit}", alternatingColors[0]);
-            AddOrUpdateWeatherCard(weatherGrid, "Feels Like", $"{service.ConvertTemperature(weather.Main.Feels_Like, unit):F1}° {unit}", alternatingColors[1]);
-            AddOrUpdateWeatherCard(weatherGrid, "Min Temp", $"{service.ConvertTemperature(weather.Main.Temp_Min, unit):F1}° {unit}", alternatingColors[0]);
-            AddOrUpdateWeatherCard(weatherGrid, "Max Temp", $"{service.ConvertTemperature(weather.Main.Temp_Max, unit):F1}° {unit}", alternatingColors[1]);
-            AddOrUpdateWeatherCard(weatherGrid, "Pressure", $"{weather.Main.Pressure} hPa", alternatingColors[0]);
-            AddOrUpdateWeatherCard(weatherGrid, "Humidity", $"{weather.Main.Humidity}%", alternatingColors[1]);
-            AddOrUpdateWeatherCard(weatherGrid, "Visibility", $"{weather.Visibility / 1000.0:F1} km", alternatingColors[0]);
-            AddOrUpdateWeatherCard(weatherGrid, "Wind", $"{weather.Wind.Speed} m/s, Direction: {weather.Wind.Deg}°", alternatingColors[1]);
-            AddOrUpdateWeatherCard(weatherGrid, "Cloudiness", $"{weather.Clouds.All}%", alternatingColors[0]);
-            AddOrUpdateWeatherCard(weatherGrid, "Rain (Last 1h)", weather.Rain != null ? $"{weather.Rain.OneHour:F1} mm" : "No rain", alternatingColors[1]);
-            AddOrUpdateWeatherCard(weatherGrid, "Sunrise", UnixTimeStampToDateTime(weather.Sys.Sunrise), alternatingColors[0]);
-            AddOrUpdateWeatherCard(weatherGrid, "Sunset", UnixTimeStampToDateTime(weather.Sys.Sunset), alternatingColors[1]);
+                var alternatingColors = new[] { Color.FromArgb(42, 42, 45), Color.FromArgb(26, 26, 29) };
 
-            weatherGrid.ResumeLayout();
+                // Create and populate weather data dictionary
+                var weatherData = GetWeatherDataDictionary(weather, unit, service);
+
+                // Loop through the weather data and add cards
+                int index = 0;
+                foreach (var data in weatherData)
+                {
+                    AddOrUpdateWeatherCard(weatherGrid, data.Key, data.Value, alternatingColors[index % 2]);
+                    index++;
+                }
+
+                weatherGrid.ResumeLayout();
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.ShowMessage($"An error occurred: {ex.Message}", "Error", MessageBoxIcon.Error);
+            }
+        }
+
+        private static Dictionary<string, string> GetWeatherDataDictionary(WeatherData weather, string unit, WeatherService service)
+        {
+            return new Dictionary<string, string>
+            {
+                { "City", $"{weather.Name ?? "N/A"}, {weather.Sys?.Country ?? "N/A"}" },
+                { "Weather", GetWeatherDescription(weather) },
+                { "Temperature", $"{service.ConvertTemperature(weather.Main?.Temp ?? 0, unit):F1}° {unit}" },
+                { "Feels Like", $"{service.ConvertTemperature(weather.Main?.Feels_Like ?? 0, unit):F1}° {unit}" },
+                { "Min Temp", $"{service.ConvertTemperature(weather.Main?.Temp_Min ?? 0, unit):F1}° {unit}" },
+                { "Max Temp", $"{service.ConvertTemperature(weather.Main?.Temp_Max ?? 0, unit):F1}° {unit}" },
+                { "Pressure", $"{(weather.Main?.Pressure ?? 0)} hPa" },
+                { "Humidity", $"{(weather.Main?.Humidity ?? 0)}%" },
+                { "Visibility", $"{GetVisibilityInKm(weather.Visibility)}" },
+                { "Wind", $"{GetWindDescription(weather)}" },
+                { "Cloudiness", $"{(weather.Clouds?.All ?? 0)}%" },
+                { "Rain (Last 1h)", GetRainDescription(weather.Rain) },
+                { "Sunrise", GetReadableDateTime(weather.Sys?.Sunrise) },
+                { "Sunset", GetReadableDateTime(weather.Sys?.Sunset) }
+            };
+        }
+
+        private static string GetWeatherDescription(WeatherData weather)
+        {
+            if (weather.Weather != null && weather.Weather.Count > 0)
+            {
+                var main = weather.Weather[0]?.Main ?? "N/A";
+                var description = weather.Weather[0]?.Description ?? "N/A";
+                return $"{description} ({main})";
+            }
+            return "N/A";
+        }
+
+        private static string GetVisibilityInKm(int? visibility)
+        {
+            return visibility > 0 ? $"{visibility / 1000.0:F1} km" : "N/A";
+        }
+
+        private static string GetWindDescription(WeatherData weather)
+        {
+            var speed = weather.Wind?.Speed ?? 0;
+            var direction = weather.Wind?.Deg ?? 0;
+            return $"{speed} m/s, Direction: {direction}°";
+        }
+
+        private static string GetRainDescription(Rain rain)
+        {
+            return rain != null ? $"{rain.OneHour:F1} mm" : "No rain";
+        }
+
+        private static string GetReadableDateTime(long? timestamp)
+        {
+            if (timestamp != null && timestamp > 0)
+            {
+                return UnixTimeStampToDateTime((long)timestamp);
+            }
+            return "N/A";
         }
 
         // updating only the temp fields when the value in the combo box changes
