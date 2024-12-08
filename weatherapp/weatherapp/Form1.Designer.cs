@@ -72,9 +72,9 @@
             this.weatherGrid.RowStyles.Clear();
 
             // Form1
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(600, 900);
+            this.ClientSize = new System.Drawing.Size(520, 930);
             this.BackColor = Color.FromArgb(26, 26, 29);
             this.Controls.Add(this.cityInput);
             this.Controls.Add(this.fetchWeatherButton);

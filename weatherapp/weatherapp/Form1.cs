@@ -15,21 +15,21 @@ namespace weatherapp
         public Form1()
         {
             InitializeComponent();
-            // creating new weather service with the database service
             _weatherService = new WeatherService(new DatabaseService());
         }
 
-        // function for the fetching data from api/db
+        // Fetch weather data when the button is clicked
         private async void FetchWeatherButton_Click(object sender, EventArgs e)
         {
-            weatherGrid.Controls.Clear();
-
             string city = cityInput.Text.Trim();
+
             if (string.IsNullOrEmpty(city))
             {
                 MessageHelper.ShowMessage("Please enter a city.", "Input Error", MessageBoxIcon.Warning);
                 return;
             }
+
+            SetLoadingState(true);
 
             _currentWeatherData = await _weatherService.GetWeatherAsync(city, "CZ");
             if (_currentWeatherData != null)
@@ -42,9 +42,11 @@ namespace weatherapp
                 );
                 await AppIconHelper.SetAppIconAsync(this, _currentWeatherData.Weather[0].Icon);
             }
+
+            SetLoadingState(false);
         }
 
-        // function to toggle between the temp values
+        // Handle temperature unit change
         private void UnitToggle_SelectedIndexChanged(object sender, EventArgs e)
         {
             _currentUnit = unitToggle.SelectedItem.ToString();
@@ -59,13 +61,31 @@ namespace weatherapp
             }
         }
 
-        // function to handle enter pressing 
+        // Submit weather request on Enter key press
         private void CityInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
                 FetchWeatherButton_Click(sender, e);
                 e.SuppressKeyPress = true; // Prevents the ding sound when pressing Enter
+            }
+        }
+
+        // Show or hide a loading indicator
+        private void SetLoadingState(bool isLoading)
+        {
+            if (isLoading)
+            {
+                weatherGrid.Controls.Clear();
+                var loadingLabel = new Label
+                {
+                    Text = "Loading...",
+                    Font = new Font("Arial", 14, FontStyle.Bold),
+                    ForeColor = Color.White,
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+                weatherGrid.Controls.Add(loadingLabel);
             }
         }
     }
