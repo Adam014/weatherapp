@@ -1,20 +1,10 @@
-﻿using System;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using WeatherApp.Helpers;
 using WeatherApp.Models;
 
 namespace WeatherApp.Services
 {
-    // defined error resposne from the api endpoint
-    public class ErrorResponse
-    {
-        public string? Cod { get; set; }
-        public string? Message { get; set; }
-    }
 
     public class WeatherService(DatabaseService databaseService)
     {
