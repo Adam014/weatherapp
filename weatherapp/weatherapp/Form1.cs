@@ -117,14 +117,16 @@ namespace weatherapp
             }
         }
 
-        // load cities from the db into the listbox
+        // load cities from the db into the listbox, filtering duplicates 
         private void LoadCityList()
         {
             var cities = _weatherService.GetSavedCities();
+            var uniqueCities = new HashSet<string>(cities); // filter duplicates using HashSet
+
             citiesListBox.Items.Clear();
-            foreach (var city in cities)
+            foreach (var city in uniqueCities)
             {
-                if (!string.IsNullOrWhiteSpace(city)) 
+                if (!string.IsNullOrWhiteSpace(city)) // 
                 {
                     citiesListBox.Items.Add(city);
                 }

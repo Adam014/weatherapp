@@ -56,7 +56,7 @@ namespace WeatherApp.Services
             return result != null ? result.ToString() : null;
         }
 
-        // func t save data to the db
+        // func to save data to the db
         public void SaveWeatherData(string city, string data)
         {
             using var connection = new SQLiteConnection(_connectionString);
