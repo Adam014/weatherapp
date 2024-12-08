@@ -29,19 +29,25 @@ namespace WeatherApp.Services
             _databaseService = databaseService;
         }
 
-        // function for getting the weather, first we check db, if not found fetching time
+        // function for getting the weather, we check if the data needs to be updated, and when it does, we freshly fetch it from the api and save it to the db
         public async Task<WeatherData?> GetWeatherAsync(string city, string lang)
         {
             try
             {
+                // Define data validity duration (e.g., 1 hour)
+                var validityDuration = TimeSpan.FromHours(1);
+
                 // check cached data
-                var cachedData = _databaseService.GetWeatherData(city);
-                if (!string.IsNullOrEmpty(cachedData))
+                if (!_databaseService.IsDataOutdated(city, validityDuration))
                 {
-                    return JsonSerializer.Deserialize<WeatherData>(cachedData);
+                    var cachedData = _databaseService.GetWeatherData(city);
+                    if (!string.IsNullOrEmpty(cachedData))
+                    {
+                        return JsonSerializer.Deserialize<WeatherData>(cachedData);
+                    }
                 }
 
-                // fetch from API
+                // fetch fresh data from API
                 var response = await FetchWeatherFromApi(city, lang);
                 if (response == null) return null;
 

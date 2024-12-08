@@ -19,6 +19,7 @@ namespace WeatherApp.Services
             InitializeDatabase();
         }
 
+        // function to init of the db
         private void InitializeDatabase()
         {
             if (!File.Exists(_dbPath))
@@ -41,6 +42,7 @@ namespace WeatherApp.Services
             command.ExecuteNonQuery();
         }
 
+        // func to get data from the db
         public string? GetWeatherData(string city)
         {
             using var connection = new SQLiteConnection(_connectionString);
@@ -54,12 +56,13 @@ namespace WeatherApp.Services
             return result != null ? result.ToString() : null;
         }
 
+        // func t save data to the db
         public void SaveWeatherData(string city, string data)
         {
             using var connection = new SQLiteConnection(_connectionString);
             connection.Open();
 
-            // Check if the city already exists
+            // check if the city already exists
             string checkQuery = "SELECT COUNT(*) FROM Weather WHERE City = @City";
             using var checkCommand = new SQLiteCommand(checkQuery, connection);
             checkCommand.Parameters.AddWithValue("@City", city);
@@ -68,7 +71,7 @@ namespace WeatherApp.Services
 
             if (exists)
             {
-                // Update existing record
+                // update existing record
                 string updateQuery = "UPDATE Weather SET Data = @Data, LastUpdated = @LastUpdated WHERE City = @City";
                 using var updateCommand = new SQLiteCommand(updateQuery, connection);
                 updateCommand.Parameters.AddWithValue("@City", city);
@@ -78,7 +81,7 @@ namespace WeatherApp.Services
             }
             else
             {
-                // Insert new record
+                // insert new record
                 string insertQuery = "INSERT INTO Weather (City, Data, LastUpdated) VALUES (@City, @Data, @LastUpdated)";
                 using var insertCommand = new SQLiteCommand(insertQuery, connection);
                 insertCommand.Parameters.AddWithValue("@City", city);
@@ -86,6 +89,26 @@ namespace WeatherApp.Services
                 insertCommand.Parameters.AddWithValue("@LastUpdated", DateTime.UtcNow);
                 insertCommand.ExecuteNonQuery();
             }
+        }
+
+        // func to check if the data in the rows are outdated
+        public bool IsDataOutdated(string city, TimeSpan validityDuration)
+        {
+            using var connection = new SQLiteConnection(_connectionString);
+            connection.Open();
+
+            string query = "SELECT LastUpdated FROM Weather WHERE City = @City";
+            using var command = new SQLiteCommand(query, connection);
+            command.Parameters.AddWithValue("@City", city);
+
+            var result = command.ExecuteScalar();
+            if (result != null && DateTime.TryParse(result.ToString(), out var lastUpdated))
+            {
+                return DateTime.UtcNow - lastUpdated > validityDuration;
+            }
+
+            // if no record is found or timestamp is invalid, consider the data outdated
+            return true;
         }
     }
 }
