@@ -47,11 +47,13 @@ namespace weatherapp
             ResetWeatherGrid();
             SetLoadingState(true);
 
-            _currentWeatherData = await _weatherService.GetWeatherAsync(city, "CZ");
-            if (_currentWeatherData != null)
+            try
             {
-                if (_currentWeatherData.Weather != null && _currentWeatherData.Weather.Count > 0)
+                _currentWeatherData = await _weatherService.GetWeatherAsync(city, "CZ");
+
+                if (_currentWeatherData != null && _currentWeatherData.Weather != null && _currentWeatherData.Weather.Count > 0)
                 {
+                    // display the fetched weather data
                     WeatherDataDisplayHelper.DisplayWeatherData(
                         weatherGrid,
                         _currentWeatherData,
@@ -64,19 +66,21 @@ namespace weatherapp
 
                     // save city to database and UI
                     _weatherService.SaveCityToDatabase(city, "N/A");
-                    AddCityToFlowPanel(city); 
+                    AddCityToFlowPanel(city);
                 }
                 else
                 {
-                    MessageHelper.ShowMessage("Weather data is unavailable for the selected city.", "Error", MessageBoxIcon.Warning);
+                    return;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                MessageHelper.ShowMessage("Failed to fetch weather data. Please try again.", "Error", MessageBoxIcon.Warning);
+                MessageHelper.ShowMessage($"Failed to fetch weather data: {ex.Message}", "Error", MessageBoxIcon.Warning);
             }
-
-            SetLoadingState(false);
+            finally
+            {
+                SetLoadingState(false);
+            }
         }
 
         // function to reset the grid
@@ -228,7 +232,7 @@ namespace weatherapp
                 }
                 else
                 {
-                    MessageHelper.ShowMessage("Weather data is unavailable for the selected city.", "Error", MessageBoxIcon.Warning);
+                    return;
                 }
             }
             else

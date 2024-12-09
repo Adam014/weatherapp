@@ -13,7 +13,6 @@ namespace WeatherApp.Helpers
         {
             if (weather == null)
             {
-                MessageHelper.ShowMessage("No weather data found. Please try again.", "Error", MessageBoxIcon.Warning);
                 return;
             }
 
@@ -46,23 +45,30 @@ namespace WeatherApp.Helpers
         // creating and returning instantly the dictionary with each weather data
         private static Dictionary<string, string> GetWeatherDataDictionary(WeatherData weather, string unit, WeatherService service)
         {
-            return new Dictionary<string, string>
+            if(weather == null)
             {
-                { "City", $"{weather.Name ?? "N/A"}, {weather.Sys?.Country ?? "N/A"}" },
-                { "Weather", WeatherDescriptionHelper.GetWeatherDescription(weather) },
-                { "Temperature", $"{service.ConvertTemperature(weather.Main?.Temp ?? 0, unit):F1}° {unit}" },
-                { "Feels Like", $"{service.ConvertTemperature(weather.Main?.Feels_Like ?? 0, unit):F1}° {unit}" },
-                { "Min Temp", $"{service.ConvertTemperature(weather.Main?.Temp_Min ?? 0, unit):F1}° {unit}" },
-                { "Max Temp", $"{service.ConvertTemperature(weather.Main?.Temp_Max ?? 0, unit):F1}° {unit}" },
-                { "Pressure", $"{(weather.Main?.Pressure ?? 0)} hPa" },
-                { "Humidity", $"{(weather.Main?.Humidity ?? 0)}%" },
-                { "Visibility", WeatherDescriptionHelper.GetVisibilityInKm(weather.Visibility) },
-                { "Wind", WeatherDescriptionHelper.GetWindDescription(weather) },
-                { "Cloudiness", $"{(weather.Clouds?.All ?? 0)}%" },
-                { "Rain (Last 1h)", WeatherDescriptionHelper.GetRainDescription(weather.Rain) },
-                { "Sunrise", DateTimeHelper.GetReadableDateTime(weather.Sys?.Sunrise) },
-                { "Sunset", DateTimeHelper.GetReadableDateTime(weather.Sys?.Sunset) }
-            };
+                return null;
+            } else
+            {
+                return new Dictionary<string, string>
+                {
+                    { "City", $"{weather.Name ?? "N/A"}, {weather.Sys?.Country ?? "N/A"}" },
+                    { "Weather", WeatherDescriptionHelper.GetWeatherDescription(weather) },
+                    { "Temperature", $"{service.ConvertTemperature(weather.Main?.Temp ?? 0, unit):F1}° {unit}" },
+                    { "Feels Like", $"{service.ConvertTemperature(weather.Main?.Feels_Like ?? 0, unit):F1}° {unit}" },
+                    { "Min Temp", $"{service.ConvertTemperature(weather.Main?.Temp_Min ?? 0, unit):F1}° {unit}" },
+                    { "Max Temp", $"{service.ConvertTemperature(weather.Main?.Temp_Max ?? 0, unit):F1}° {unit}" },
+                    { "Pressure", $"{(weather.Main?.Pressure ?? 0)} hPa" },
+                    { "Humidity", $"{(weather.Main?.Humidity ?? 0)}%" },
+                    { "Visibility", WeatherDescriptionHelper.GetVisibilityInKm(weather.Visibility) },
+                    { "Wind", WeatherDescriptionHelper.GetWindDescription(weather) },
+                    { "Cloudiness", $"{(weather.Clouds?.All ?? 0)}%" },
+                    { "Rain (Last 1h)", WeatherDescriptionHelper.GetRainDescription(weather.Rain) },
+                    { "Sunrise", DateTimeHelper.GetReadableDateTime(weather.Sys?.Sunrise) },
+                    { "Sunset", DateTimeHelper.GetReadableDateTime(weather.Sys?.Sunset) }
+                };
+            }
+
         }
 
         // updating temp fields when we switch the temp unit in the combobox

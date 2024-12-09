@@ -38,9 +38,9 @@ namespace WeatherApp.Services
 
                 // fetch fresh data from API
                 var response = await FetchWeatherFromApi(city, lang);
-                if (response == null) return null;
+                if (response == null || response.Cod == 404) return null; 
 
-                // save to database
+                // save to database only if the response is valid
                 var jsonData = JsonSerializer.Serialize(response);
                 _databaseService.SaveWeatherData(city, jsonData);
 
@@ -63,7 +63,26 @@ namespace WeatherApp.Services
             var url = $"https://open-weather13.p.rapidapi.com/city/{city}/{lang}";
             var httpResponse = await client.GetAsync(url);
 
-            return await httpResponse.Content.ReadFromJsonAsync<WeatherData>();
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                // log or show an error if the city is not found
+                var errorResponse = await httpResponse.Content.ReadAsStringAsync();
+                var errorMessage = JsonSerializer.Deserialize<JsonElement>(errorResponse)
+                    .GetProperty("message").GetString();
+                MessageHelper.ShowMessage($"API Error: {errorMessage}", "City Not Found", MessageBoxIcon.Warning);
+                return null;
+            }
+
+            var weatherData = await httpResponse.Content.ReadFromJsonAsync<WeatherData>();
+
+            // validate the `Cod` field
+            if (weatherData?.Cod == 404)
+            {
+                MessageHelper.ShowMessage("City not found. Please try a different one.", "Error", MessageBoxIcon.Warning);
+                return null;
+            }
+
+            return weatherData;
         }
 
         // function to convert temperatues (celsius, fahrenheit and kelvins)
