@@ -69,6 +69,10 @@ namespace WeatherApp.Services
 
             var exists = Convert.ToInt32(checkCommand.ExecuteScalar()) > 0;
 
+            // convert UTC time to CET
+            var cetZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
+            var cetNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, cetZone);
+
             if (exists)
             {
                 // update existing record
@@ -76,7 +80,7 @@ namespace WeatherApp.Services
                 using var updateCommand = new SQLiteCommand(updateQuery, connection);
                 updateCommand.Parameters.AddWithValue("@City", city);
                 updateCommand.Parameters.AddWithValue("@Data", data);
-                updateCommand.Parameters.AddWithValue("@LastUpdated", DateTime.UtcNow);
+                updateCommand.Parameters.AddWithValue("@LastUpdated", cetNow);
                 updateCommand.ExecuteNonQuery();
             }
             else
@@ -86,7 +90,7 @@ namespace WeatherApp.Services
                 using var insertCommand = new SQLiteCommand(insertQuery, connection);
                 insertCommand.Parameters.AddWithValue("@City", city);
                 insertCommand.Parameters.AddWithValue("@Data", data);
-                insertCommand.Parameters.AddWithValue("@LastUpdated", DateTime.UtcNow);
+                insertCommand.Parameters.AddWithValue("@LastUpdated", cetNow);
                 insertCommand.ExecuteNonQuery();
             }
         }
@@ -139,18 +143,18 @@ namespace WeatherApp.Services
             return cities;
         }
 
-        // Debugging function to reset database when it is needed
+        // debugging function to reset database when it is needed
         public void ResetDatabase()
         {
             using var connection = new SQLiteConnection(_connectionString);
             connection.Open();
 
-            // Drop the Weather table if it exists
+            // drop the Weather table if it exists
             string dropTableQuery = "DROP TABLE IF EXISTS Weather";
             using var dropCommand = new SQLiteCommand(dropTableQuery, connection);
             dropCommand.ExecuteNonQuery();
 
-            // Recreate the Weather table
+            // recreate the Weather table
             string createTableQuery = @"
         CREATE TABLE IF NOT EXISTS Weather (
             Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -162,6 +166,26 @@ namespace WeatherApp.Services
             createCommand.ExecuteNonQuery();
 
             Console.WriteLine("Database has been reset.");
+        }
+
+        // getting last updated time for city
+        public DateTime? GetLastUpdatedTime(string city)
+        {
+            using var connection = new SQLiteConnection(_connectionString);
+            connection.Open();
+
+            string query = "SELECT LastUpdated FROM Weather WHERE City = @City";
+            using var command = new SQLiteCommand(query, connection);
+            command.Parameters.AddWithValue("@City", city);
+
+            var result = command.ExecuteScalar();
+            if (result != null && DateTime.TryParse(result.ToString(), out var utcTime))
+            {
+                // Ensure the DateTime is treated as UTC
+                return DateTime.SpecifyKind(utcTime, DateTimeKind.Utc);
+            }
+
+            return null;
         }
     }
 }

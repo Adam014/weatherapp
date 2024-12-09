@@ -48,6 +48,8 @@ namespace weatherapp
                     );
                     await AppIconHelper.SetAppIconAsync(this, _currentWeatherData.Weather[0].Icon);
 
+                    UpdateLastUpdatedLabel(city);
+
                     // Add city to the list
                     AddCityToList(city, _currentWeatherData.Sys?.Country ?? "N/A");
                 }
@@ -161,6 +163,10 @@ namespace weatherapp
                         _currentUnit,
                         _weatherService
                     );
+
+                    await AppIconHelper.SetAppIconAsync(this, _currentWeatherData.Weather[0].Icon);
+
+                    UpdateLastUpdatedLabel(city);
                 }
 
                 SetLoadingState(false);
@@ -184,6 +190,20 @@ namespace weatherapp
             }
 
             isPanelVisible = !isPanelVisible;
+        }
+
+        // function to update lastupdated label
+        private void UpdateLastUpdatedLabel(string city)
+        {
+            var lastUpdated = _weatherService.GetLastUpdatedTime(city);
+            if (lastUpdated.HasValue)
+            {
+                lastUpdatedLabel.Text = $"Last Updated: {lastUpdated.Value:g} (CET)";
+            }
+            else
+            {
+                lastUpdatedLabel.Text = "Last Updated: N/A";
+            }
         }
     }
 }

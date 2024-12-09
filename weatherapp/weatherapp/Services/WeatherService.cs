@@ -75,5 +75,11 @@ namespace WeatherApp.Services
         {
             return _databaseService.GetSavedCities();
         }
+
+        // get last updated time for city
+        public DateTime? GetLastUpdatedTime(string city)
+        {
+            return _databaseService.GetLastUpdatedTime(city);
+        }
     }
 }

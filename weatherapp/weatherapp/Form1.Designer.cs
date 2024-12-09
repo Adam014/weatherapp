@@ -9,6 +9,7 @@
         private System.Windows.Forms.Panel citiesPanel;
         private System.Windows.Forms.ListBox citiesListBox;
         private System.Windows.Forms.Button togglePanelButton;
+        private System.Windows.Forms.Label lastUpdatedLabel;
 
         /// <summary>
         ///  Clean up any resources being used.
@@ -86,6 +87,19 @@
             this.cityInput.Size = new System.Drawing.Size(200, 27);
             this.cityInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CityInput_KeyDown);
 
+            // Last Updated Label
+            this.lastUpdatedLabel = new Label
+            {
+                Dock = DockStyle.Top,
+                TextAlign = ContentAlignment.TopRight,
+                ForeColor = Color.White,
+                BackColor = Color.FromArgb(26, 26, 29),
+                Font = new Font("Segoe UI", 9, FontStyle.Italic),
+                Padding = new Padding(10),
+                Height = 40
+            };
+            this.lastUpdatedLabel.Text = "Last Updated: N/A";
+
             // Fetch Weather Button
             this.fetchWeatherButton.Location = new System.Drawing.Point(270, 20);
             this.fetchWeatherButton.Name = "fetchWeatherButton";
@@ -126,6 +140,7 @@
             this.Controls.Add(this.citiesPanel);
             this.Controls.Add(weatherGrid); 
             this.Controls.Add(controlsPanel);
+            this.Controls.Add(this.lastUpdatedLabel);
             this.Name = "Form1";
             this.Text = "Weather App";
             this.ResumeLayout(false);
