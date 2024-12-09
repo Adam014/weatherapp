@@ -1,1 +1,1 @@
-﻿TODO: Add deleting button to delete each city in the list 
+﻿TODO: Add refresh button next to the Last Updated

@@ -123,21 +123,16 @@ namespace WeatherApp.Services
             using var connection = new SQLiteConnection(_connectionString);
             connection.Open();
 
-            string query = "SELECT Data FROM Weather";
+            string query = "SELECT City FROM Weather";
             using var command = new SQLiteCommand(query, connection);
             using var reader = command.ExecuteReader();
 
             while (reader.Read())
             {
-                var data = reader["Data"].ToString();
-                if (!string.IsNullOrWhiteSpace(data))
-                {
-                    var weatherData = JsonSerializer.Deserialize<WeatherData>(data);
-                    if (weatherData != null && !string.IsNullOrWhiteSpace(weatherData.Name) && !string.IsNullOrWhiteSpace(weatherData.Sys?.Country))
-                    {
-                        cities.Add($"{weatherData.Name}, {weatherData.Sys.Country}");
-                    }
-                }
+                var cityName = reader["City"]?.ToString() ?? "Unknown";
+
+                // add only the city to the list
+                cities.Add(cityName);
             }
 
             return cities;

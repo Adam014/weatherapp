@@ -63,8 +63,8 @@ namespace weatherapp
                     UpdateLastUpdatedLabel(city);
 
                     // save city to database and UI
-                    _weatherService.SaveCityToDatabase(city, _currentWeatherData.Sys?.Country ?? "N/A");
-                    AddCityToFlowPanel(city, _currentWeatherData.Sys?.Country ?? "N/A");
+                    _weatherService.SaveCityToDatabase(city, "N/A");
+                    AddCityToFlowPanel(city); 
                 }
                 else
                 {
@@ -141,19 +141,13 @@ namespace weatherapp
 
             foreach (var city in distinctCities)
             {
-                var parts = city.Split(',');
-                if (parts.Length >= 2)
-                {
-                    AddCityToFlowPanel(parts[0].Trim(), parts[1].Trim());
-                }
+                AddCityToFlowPanel(city); 
             }
         }
 
         // add each city to the flowpanel
-        private void AddCityToFlowPanel(string city, string country)
+        private void AddCityToFlowPanel(string city)
         {
-            string cityEntry = $"{city}, {country}";
-
             // City Panel
             var cityPanel = new Panel
             {
@@ -167,7 +161,7 @@ namespace weatherapp
             // City Label
             var cityLabel = new Label
             {
-                Text = cityEntry,
+                Text = city, 
                 ForeColor = Color.White,
                 AutoSize = false,
                 TextAlign = ContentAlignment.MiddleLeft,
