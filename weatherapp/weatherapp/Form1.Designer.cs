@@ -75,7 +75,7 @@
             // City Input
             this.cityInput.Location = new System.Drawing.Point(50, 20);
             this.cityInput.Name = "cityInput";
-            this.cityInput.PlaceholderText = "Enter city";
+            this.cityInput.PlaceholderText = "Enter city... (format: Prague)";
             this.cityInput.Size = new System.Drawing.Size(200, 27);
             this.cityInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CityInput_KeyDown);
 
