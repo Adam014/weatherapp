@@ -187,5 +187,31 @@ namespace WeatherApp.Services
 
             return null;
         }
+
+        // deleting city from the db
+        public void DeleteCity(string city)
+        {
+            using var connection = new SQLiteConnection(_connectionString);
+            connection.Open();
+
+            string query = "DELETE FROM Weather WHERE City = @City";
+            using var command = new SQLiteCommand(query, connection);
+            command.Parameters.AddWithValue("@City", city);
+
+            command.ExecuteNonQuery();
+        }
+
+        // checking func if provided city is in db
+        public bool DoesCityExist(string city)
+        {
+            using var connection = new SQLiteConnection(_connectionString);
+            connection.Open();
+
+            string query = "SELECT COUNT(*) FROM Weather WHERE City = @City";
+            using var command = new SQLiteCommand(query, connection);
+            command.Parameters.AddWithValue("@City", city);
+
+            return Convert.ToInt32(command.ExecuteScalar()) > 0;
+        }
     }
 }

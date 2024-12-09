@@ -10,7 +10,7 @@ namespace weatherapp
         private readonly WeatherService _weatherService;
         private WeatherData? _currentWeatherData;
         private string _currentUnit = "Celsius"; // Default temp unit
-        private bool isPanelVisible = true; 
+        private bool isPanelVisible = true;
 
         public Form1()
         {
@@ -32,6 +32,18 @@ namespace weatherapp
                 return;
             }
 
+            // check if the city already exists in the database
+            if (_weatherService.IsCityInDatabase(city))
+            {
+                MessageBox.Show(
+                    $"{city} is already saved in the database.",
+                    "City Already Exists",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+                return; // exit early to avoid fetching and saving duplicate cities
+            }
+
             ResetWeatherGrid();
             SetLoadingState(true);
 
@@ -50,8 +62,9 @@ namespace weatherapp
 
                     UpdateLastUpdatedLabel(city);
 
-                    // Add city to the list
-                    AddCityToList(city, _currentWeatherData.Sys?.Country ?? "N/A");
+                    // save city to database and UI
+                    _weatherService.SaveCityToDatabase(city, _currentWeatherData.Sys?.Country ?? "N/A");
+                    AddCityToFlowPanel(city, _currentWeatherData.Sys?.Country ?? "N/A");
                 }
                 else
                 {
@@ -69,11 +82,11 @@ namespace weatherapp
         // function to reset the grid
         private void ResetWeatherGrid()
         {
-            weatherGrid.SuspendLayout(); 
+            weatherGrid.SuspendLayout();
             weatherGrid.Controls.Clear();
             weatherGrid.RowStyles.Clear();
             weatherGrid.RowCount = 0;
-            weatherGrid.ResumeLayout(); 
+            weatherGrid.ResumeLayout();
         }
 
         // handeling change && converting temp with the selected temp unit 
@@ -119,43 +132,91 @@ namespace weatherapp
             }
         }
 
-        // load cities from the db into the listbox, filtering duplicates 
+        // load cities from the database into the FlowLayoutPanel
         private void LoadCityList()
         {
             var cities = _weatherService.GetSavedCities();
-            var uniqueCities = new HashSet<string>(cities); // filter duplicates using HashSet
+            var distinctCities = new HashSet<string>(cities);
+            citiesFlowPanel.Controls.Clear();
 
-            citiesListBox.Items.Clear();
-            foreach (var city in uniqueCities)
+            foreach (var city in distinctCities)
             {
-                if (!string.IsNullOrWhiteSpace(city)) // 
+                var parts = city.Split(',');
+                if (parts.Length >= 2)
                 {
-                    citiesListBox.Items.Add(city);
+                    AddCityToFlowPanel(parts[0].Trim(), parts[1].Trim());
                 }
             }
         }
 
-        // add a city to the listbox
-        private void AddCityToList(string city, string country)
+        // add each city to the flowpanel
+        private void AddCityToFlowPanel(string city, string country)
         {
             string cityEntry = $"{city}, {country}";
-            if (!citiesListBox.Items.Contains(cityEntry) && !string.IsNullOrWhiteSpace(city))
+
+            // City Panel
+            var cityPanel = new Panel
             {
-                citiesListBox.Items.Add(cityEntry);
-            }
+                Height = 40,
+                Width = citiesFlowPanel.Width - 20,
+                BackColor = Color.FromArgb(26, 26, 29),
+                Padding = new Padding(5),
+                Margin = new Padding(5)
+            };
+
+            // City Label
+            var cityLabel = new Label
+            {
+                Text = cityEntry,
+                ForeColor = Color.White,
+                AutoSize = false,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Dock = DockStyle.Fill,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+
+            // Delete Button
+            var deleteButton = new Button
+            {
+                Text = "Delete",
+                BackColor = Color.FromArgb(166, 77, 121),
+                ForeColor = Color.White,
+                Dock = DockStyle.Right,
+                FlatStyle = FlatStyle.Flat,
+                Width = 60,
+                Cursor = Cursors.Hand
+            };
+
+            deleteButton.FlatAppearance.BorderSize = 0;
+
+            // deleting the city from the db & panel when clicking the delete button
+            deleteButton.Click += (s, e) =>
+            {
+                _weatherService.DeleteCityFromDatabase(city);
+                citiesFlowPanel.Controls.Remove(cityPanel);
+            };
+
+            // displaying the data for the city that we click on label or panel
+            cityPanel.Click += async (s, e) => await DisplayWeatherForCity(city);
+            cityLabel.Click += async (s, e) => await DisplayWeatherForCity(city);
+
+            cityPanel.Controls.Add(deleteButton);
+            cityPanel.Controls.Add(cityLabel);
+
+            citiesFlowPanel.Controls.Add(cityPanel);
         }
 
-        // handle city selection from the ListBox
-        private async void CitiesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        // display weather data for the city in the panel
+        private async Task DisplayWeatherForCity(string city)
         {
-            if (citiesListBox.SelectedItem is string selectedCity)
-            {
-                string city = selectedCity.Split(',')[0].Trim();
-                ResetWeatherGrid();
-                SetLoadingState(true);
+            ResetWeatherGrid();
+            SetLoadingState(true);
 
-                _currentWeatherData = await _weatherService.GetWeatherAsync(city, "CZ");
-                if (_currentWeatherData != null)
+            _currentWeatherData = await _weatherService.GetWeatherAsync(city, "CZ");
+            if (_currentWeatherData != null)
+            {
+                if (_currentWeatherData.Weather != null && _currentWeatherData.Weather.Count > 0)
                 {
                     WeatherDataDisplayHelper.DisplayWeatherData(
                         weatherGrid,
@@ -167,10 +228,21 @@ namespace weatherapp
                     await AppIconHelper.SetAppIconAsync(this, _currentWeatherData.Weather[0].Icon);
 
                     UpdateLastUpdatedLabel(city);
-                }
 
-                SetLoadingState(false);
+                    // Ensure unit conversion logic is applied
+                    UnitToggle_SelectedIndexChanged(null, null);
+                }
+                else
+                {
+                    MessageHelper.ShowMessage("Weather data is unavailable for the selected city.", "Error", MessageBoxIcon.Warning);
+                }
             }
+            else
+            {
+                MessageHelper.ShowMessage("Failed to fetch weather data. Please try again.", "Error", MessageBoxIcon.Warning);
+            }
+
+            SetLoadingState(false);
         }
 
         // toggle function to hide or show the panel with the saved cities
@@ -186,7 +258,7 @@ namespace weatherapp
             {
                 // Show the panel
                 citiesPanel.Visible = true;
-                togglePanelButton.Text = ">"; 
+                togglePanelButton.Text = ">";
             }
 
             isPanelVisible = !isPanelVisible;

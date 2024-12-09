@@ -2,19 +2,12 @@
 {
     partial class Form1
     {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.Panel citiesPanel;
-        private System.Windows.Forms.ListBox citiesListBox;
+        private System.Windows.Forms.FlowLayoutPanel citiesFlowPanel;
         private System.Windows.Forms.Button togglePanelButton;
         private System.Windows.Forms.Label lastUpdatedLabel;
 
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -32,28 +25,28 @@
             this.unitToggle = new System.Windows.Forms.ComboBox();
             this.weatherGrid = new System.Windows.Forms.TableLayoutPanel();
             this.citiesPanel = new System.Windows.Forms.Panel();
-            this.citiesListBox = new System.Windows.Forms.ListBox();
+            this.citiesFlowPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.SuspendLayout();
 
             // Cities Panel
             this.citiesPanel.Dock = DockStyle.Right;
-            this.citiesPanel.Width = 150;
+            this.citiesPanel.Width = 200;
             this.citiesPanel.BackColor = Color.FromArgb(30, 30, 33);
             this.citiesPanel.Padding = new Padding(10);
-            this.citiesPanel.Controls.Add(this.citiesListBox);
+            this.citiesPanel.Controls.Add(this.citiesFlowPanel); // Ensure citiesFlowPanel is added
 
-            // Cities ListBox
-            this.citiesListBox.Dock = DockStyle.Fill;
-            this.citiesListBox.BackColor = Color.FromArgb(42, 42, 45);
-            this.citiesListBox.ForeColor = Color.White;
-            this.citiesListBox.Font = new Font("Segoe UI", 10);
-            this.citiesListBox.BorderStyle = BorderStyle.None;
-            this.citiesListBox.SelectedIndexChanged += new System.EventHandler(this.CitiesListBox_SelectedIndexChanged);
+            // Cities FlowLayoutPanel
+            this.citiesFlowPanel.Dock = DockStyle.Fill;
+            this.citiesFlowPanel.BackColor = Color.FromArgb(42, 42, 45);
+            this.citiesFlowPanel.AutoScroll = true;
+            this.citiesFlowPanel.FlowDirection = FlowDirection.TopDown;
+            this.citiesFlowPanel.WrapContents = false;
+            this.citiesFlowPanel.Padding = new Padding(5);
 
             // Toggle Panel Button
             this.togglePanelButton = new Button
             {
-                Text = ">", 
+                Text = ">",
                 Dock = DockStyle.Right,
                 Width = 30,
                 BackColor = Color.FromArgb(26, 26, 29),
@@ -63,7 +56,7 @@
             this.togglePanelButton.FlatAppearance.BorderSize = 0;
             this.togglePanelButton.Click += new EventHandler(this.TogglePanelButton_Click);
 
-            // control panel (input & buttons)
+            // Control Panel (input & buttons)
             var controlsPanel = new Panel
             {
                 Dock = DockStyle.Top,
@@ -75,7 +68,6 @@
             controlsPanel.Controls.Add(fetchWeatherButton);
             controlsPanel.Controls.Add(unitToggle);
 
-            // input & buttons location inside of the control panel
             cityInput.Location = new System.Drawing.Point(10, 10);
             fetchWeatherButton.Location = new System.Drawing.Point(220, 10);
             unitToggle.Location = new System.Drawing.Point(350, 10);
@@ -120,10 +112,10 @@
             this.unitToggle.SelectedIndex = 0;
             this.unitToggle.SelectedIndexChanged += new System.EventHandler(this.UnitToggle_SelectedIndexChanged);
 
-            // Weather Grid (TableLayoutPanel)
-            weatherGrid.Dock = DockStyle.Fill; 
+            // Weather Grid
+            weatherGrid.Dock = DockStyle.Fill;
             weatherGrid.AutoScroll = true;
-            weatherGrid.Padding = new Padding(10); 
+            weatherGrid.Padding = new Padding(10);
             weatherGrid.Margin = new Padding(0);
             weatherGrid.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             weatherGrid.ColumnCount = 2;
@@ -138,7 +130,7 @@
             this.BackColor = Color.FromArgb(26, 26, 29);
             this.Controls.Add(this.togglePanelButton);
             this.Controls.Add(this.citiesPanel);
-            this.Controls.Add(weatherGrid); 
+            this.Controls.Add(weatherGrid);
             this.Controls.Add(controlsPanel);
             this.Controls.Add(this.lastUpdatedLabel);
             this.Name = "Form1";

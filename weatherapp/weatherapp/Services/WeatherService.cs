@@ -26,7 +26,13 @@ namespace WeatherApp.Services
                     var cachedData = _databaseService.GetWeatherData(city);
                     if (!string.IsNullOrEmpty(cachedData))
                     {
-                        return JsonSerializer.Deserialize<WeatherData>(cachedData);
+                        var weatherData = JsonSerializer.Deserialize<WeatherData>(cachedData);
+
+                        // validate cached data
+                        if (weatherData?.Weather != null && weatherData.Weather.Count > 0)
+                        {
+                            return weatherData;
+                        }
                     }
                 }
 
@@ -80,6 +86,43 @@ namespace WeatherApp.Services
         public DateTime? GetLastUpdatedTime(string city)
         {
             return _databaseService.GetLastUpdatedTime(city);
+        }
+
+        // deleting city from db
+        public void DeleteCityFromDatabase(string city)
+        {
+            _databaseService.DeleteCity(city);
+        }
+
+        // checking if provided city isnt already in database
+        public bool IsCityInDatabase(string city)
+        {
+            return _databaseService.DoesCityExist(city);
+        }
+
+        // saving city to database
+        public void SaveCityToDatabase(string city, string country)
+        {
+            _databaseService.SaveWeatherData(city, "{}");
+        }
+
+        // getting weather data for provided city
+        public async Task<(WeatherData? WeatherData, string? ErrorMessage)> FetchWeatherForCity(string city, string lang)
+        {
+            try
+            {
+                var weatherData = await GetWeatherAsync(city, lang);
+                if (weatherData == null || weatherData.Weather == null || weatherData.Weather.Count == 0)
+                {
+                    return (null, "Weather data is unavailable for the selected city.");
+                }
+
+                return (weatherData, null); // No error
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Failed to fetch weather data. Error: {ex.Message}");
+            }
         }
     }
 }
